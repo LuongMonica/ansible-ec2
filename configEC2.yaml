@@ -46,11 +46,11 @@
         name: pymysql
         state: present
 
-    - name: make .my.cnf file for mysql credentials
+    - name: copy .my.cnf with mysql credentials 
       become: true
-      file:
-        path: /home/ubuntu/.my.cnf
-           
+      template:
+        src: templates/my.cnf
+        dest: /root/.my.cnf
 
     ### reset root pw
     #- name: stop mysql
