@@ -1,0 +1,3 @@
+# Ansible File's to ignore
+*.retry
+*hosts.ini
