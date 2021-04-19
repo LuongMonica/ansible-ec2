@@ -1,0 +1,8 @@
+---
+- name: Terminate EC2
+  hosts: cit496
+
+  tasks:
+    - name: Terminate it
+      amazon.aws.ec2:
+        state: absent

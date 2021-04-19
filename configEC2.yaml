@@ -1,0 +1,191 @@
+---
+- name: Configure EC2 instance to run LAMP stack
+  hosts: cit496 
+  vars:
+    mysql_root_pw: rootpassword
+
+  tasks:
+    - name: update repo
+      become: true
+      apt:
+        update_cache: yes
+
+    - name: install git
+      become: true
+      apt:
+        name: git
+        state: present
+    
+    - name: git clone project
+      git:
+        repo: 'https://github.com/LuongMonica/project4.git'
+        clone: yes
+        dest: /home/ubuntu/project4
+     
+    - name: install apache
+      become: true
+      apt:
+        name: apache2
+        state: present
+
+    - name: install mysql
+      become: true
+      apt:
+        name: ['mysql-server', 'python-mysqldb']
+        state: present
+
+    - name: install pip
+      become: true
+      apt:
+        name: python3-pip 
+        state: present
+
+    - name: install pymysql (needed for mysql_user module)
+      become: true
+      pip:
+        name: pymysql
+        state: present
+
+    - name: make .my.cnf file for mysql credentials
+      become: true
+      file:
+        path: /home/ubuntu/.my.cnf
+           
+
+    ### reset root pw
+    #- name: stop mysql
+    # become: true
+    # service:
+    #   name: mysql
+    #   state: stopped
+
+        #- name: set env vars
+        #become: true
+        #shell: systemctl set-environment MYSQLD_OPTS="--skip-grant-tables"
+
+        #- name: start mysql
+        #become: true
+        #service:
+        #name: mysql
+        #state: started
+
+        #- name: reset mysql root pw
+        #become: true
+        #command: mysql -u root --execute="UPDATE mysql.user SET authentication_string = PASSWORD('{{ mysql_root_pw }}') WHERE User = 'root' AND (Host = 'localhost' OR Host = '127.0.0.1');"
+
+        #- name: flush mysql privs
+        #become: true
+        #command: mysql -u root --execute="FLUSH PRIVILEGES"
+ 
+        #- name: stop mysql
+        #become: true
+        #service:
+        #name: mysql
+        #state: stopped
+
+        #- name: unset env vars
+        #become: true 
+        #shell: systemctl unset-environment MYSQLD_OPTS
+
+        #- name: start mysql
+        #become: true
+        #service:
+        #name: mysql
+        #state: started
+
+        # - name: set the mysql root password
+        #become: true
+        #community.mysql.mysql_user: 
+        #name: root 
+        #password: "{{ mysql_root_pw }}"
+        #host: localhost
+        #login_user: root
+        #login_password: "{{ mysql_root_pw }}"
+        #login_unix_socket: /var/run/mysqld/mysqld.sock
+        #check_implicit_admin: yes
+        #priv: "*.*:ALL,GRANT"
+
+    - name: delete anonymous mysql users for localhost
+      become: true
+      community.mysql.mysql_user: 
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: root
+        state: absent
+
+    - name: secure mysql root user for ipv4 localhost
+      become: true
+      community.mysql.mysql_user: name="root" password="{{ mysql_root_pw }}" host="127.0.0.1" login_unix_socket=/var/run/mysqld/mysqld.sock
+
+    - name: secure mysql root user for localhost
+      become: true
+      community.mysql.mysql_user: name="root" password="{{ mysql_root_pw }}" host="localhost" login_unix_socket=/var/run/mysqld/mysqld.sock 
+
+    - name: remove the mysql test database
+      become: true
+      community.mysql.mysql_db: db=test state=absent login_unix_socket=/var/run/mysqld/mysqld.sock
+
+    - name: install debconf & debconf-utils to preconfigure phpmyadmin because it asks questions during installation
+      become: true
+      apt:
+        name: ['debconf', 'debconf-utils']
+        state: present
+          
+    - name: debconf for phpmyadmin
+      become: true
+      debconf:  name=phpmyadmin question='phpmyadmin/reconfigure-webserver' value='apache2' vtype='multiselect'
+    
+    - name: debconf for phpmyadmin set dbconfig-install
+      become: true
+      debconf: name=phpmyadmin question='phpmyadmin/dbconfig-install' value='true' vtype='boolean'
+                    
+    - name: debconf for phpmyadmin mysql application password
+      become: true
+      debconf: name=phpmyadmin question='phpmyadmin/mysql/app-pass' value='' vtype='password'
+       
+    - name: install phpmyadmin
+      become: true
+      apt:
+        name: phpmyadmin
+      notify: restart apache
+
+    - name: install php-mbstring
+      become: true
+      apt:
+        name: php-mbstring
+        state: present
+
+    - name: create user 'pma' with all privileges
+      community.mysql.mysql_user: 
+        name: pma
+        password: f00barbin
+        host: localhost
+        priv: '*.*:ALL'
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      notify: restart mysql
+
+    - name: import mysql table
+      community.mysql.mysql_db:
+        state: dump
+        name: all
+        target: /home/ubuntu/project4/idtable.sql
+
+    - name: copy php file to doc root
+      become: true
+      file:
+        src: /home/ubuntu/project4/newid.php
+        dest: /var/www/html
+  
+  handlers:
+  - name: restart apache
+    become: true
+    service:
+      name: apache2
+      state: restarted
+
+  - name: restart mysql
+    become: true
+    service:
+      name: mysql
+      state: restarted
+...
