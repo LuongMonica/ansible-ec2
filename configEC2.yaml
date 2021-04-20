@@ -126,7 +126,7 @@
     - name: import mysql table
       become: true
       community.mysql.mysql_db:
-        state: dump
+        state: import
         name: all
         target: /home/ubuntu/project4/idtable.sql
 
@@ -135,6 +135,7 @@
       file:
         src: /home/ubuntu/project4/newid.php
         dest: /var/www/html
+        state: hard
   
   handlers:
   - name: restart apache
