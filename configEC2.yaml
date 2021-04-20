@@ -124,6 +124,7 @@
       notify: restart mysql
 
     - name: import mysql table
+      become: true
       community.mysql.mysql_db:
         state: dump
         name: all
