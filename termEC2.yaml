@@ -5,4 +5,5 @@
   tasks:
     - name: Terminate it
       amazon.aws.ec2:
+        instance_ids: i-07350782d8337014d
         state: absent
