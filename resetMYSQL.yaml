@@ -1,0 +1,56 @@
+---
+- name: reset mysql root pw
+  hosts: host
+
+  tasks:
+    
+    ### reset root pw
+    #- name: stop mysql
+    # become: true
+    # service:
+    #   name: mysql
+    #   state: stopped
+
+        #- name: set env vars
+        #become: true
+        #shell: systemctl set-environment MYSQLD_OPTS="--skip-grant-tables"
+
+        #- name: start mysql
+        #become: true
+        #service:
+        #name: mysql
+        #state: started
+
+        #    - name: reset mysql root pw
+        #      become: true
+        #      command: mysql -u root --execute="UPDATE mysql.user SET authentication_string = PASSWORD('{{ mysql_root_pw }}') WHERE User = 'root' AND (Host = 'localhost' OR Host = '127.0.0.1');"
+        #
+        #    - name: flush mysql privs
+        #      become: true
+        #      command: mysql -u root --execute="FLUSH PRIVILEGES"
+        # 
+        #    - name: stop mysql
+        #      become: true
+        #      service:
+        #        name: mysql
+        #        state: stopped
+        #
+        #    - name: unset env vars
+        #      become: true 
+        #      shell: systemctl unset-environment MYSQLD_OPTS
+        #
+        #    - name: start mysql
+        #      become: true
+        #      service:
+        #        name: mysql
+        #        state: started
+        #
+        # - name: set the mysql root password
+        #become: true
+        #community.mysql.mysql_user: 
+        #name: root 
+        #password: "{{ mysql_root_pw }}"
+        #host: localhost
+        #login_unix_socket: /var/run/mysqld/mysqld.sock
+        #check_implicit_admin: yes
+        #priv: "*.*:ALL,GRANT"

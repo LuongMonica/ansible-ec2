@@ -46,7 +46,6 @@
         name: pymysql
         state: present
 
-
     ### reset root pw
     #- name: stop mysql
     # become: true
@@ -94,8 +93,6 @@
         #name: root 
         #password: "{{ mysql_root_pw }}"
         #host: localhost
-        #login_user: root
-        #login_password: "{{ mysql_root_pw }}"
         #login_unix_socket: /var/run/mysqld/mysqld.sock
         #check_implicit_admin: yes
         #priv: "*.*:ALL,GRANT"
@@ -111,7 +108,7 @@
       become: true
       community.mysql.mysql_user: 
         login_unix_socket: /var/run/mysqld/mysqld.sock
-        name: root
+        name: ''
         state: absent
     
     - name: secure mysql root user for ipv4 localhost
