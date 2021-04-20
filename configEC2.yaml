@@ -46,11 +46,6 @@
         name: pymysql
         state: present
 
-    - name: copy .my.cnf with mysql credentials 
-      become: true
-      template:
-        src: templates/my.cnf
-        dest: /root/.my.cnf
 
     ### reset root pw
     #- name: stop mysql
@@ -69,30 +64,30 @@
         #name: mysql
         #state: started
 
-        #- name: reset mysql root pw
-        #become: true
-        #command: mysql -u root --execute="UPDATE mysql.user SET authentication_string = PASSWORD('{{ mysql_root_pw }}') WHERE User = 'root' AND (Host = 'localhost' OR Host = '127.0.0.1');"
-
-        #- name: flush mysql privs
-        #become: true
-        #command: mysql -u root --execute="FLUSH PRIVILEGES"
- 
-        #- name: stop mysql
-        #become: true
-        #service:
-        #name: mysql
-        #state: stopped
-
-        #- name: unset env vars
-        #become: true 
-        #shell: systemctl unset-environment MYSQLD_OPTS
-
-        #- name: start mysql
-        #become: true
-        #service:
-        #name: mysql
-        #state: started
-
+        #    - name: reset mysql root pw
+        #      become: true
+        #      command: mysql -u root --execute="UPDATE mysql.user SET authentication_string = PASSWORD('{{ mysql_root_pw }}') WHERE User = 'root' AND (Host = 'localhost' OR Host = '127.0.0.1');"
+        #
+        #    - name: flush mysql privs
+        #      become: true
+        #      command: mysql -u root --execute="FLUSH PRIVILEGES"
+        # 
+        #    - name: stop mysql
+        #      become: true
+        #      service:
+        #        name: mysql
+        #        state: stopped
+        #
+        #    - name: unset env vars
+        #      become: true 
+        #      shell: systemctl unset-environment MYSQLD_OPTS
+        #
+        #    - name: start mysql
+        #      become: true
+        #      service:
+        #        name: mysql
+        #        state: started
+        #
         # - name: set the mysql root password
         #become: true
         #community.mysql.mysql_user: 
@@ -105,21 +100,28 @@
         #check_implicit_admin: yes
         #priv: "*.*:ALL,GRANT"
 
+    - name: copy .my.cnf with mysql credentials 
+      become: true
+      template:
+        src: templates/my.cnf
+        dest: /root/.my.cnf
+        mode: 0600
+
     - name: delete anonymous mysql users for localhost
       become: true
       community.mysql.mysql_user: 
         login_unix_socket: /var/run/mysqld/mysqld.sock
         name: root
         state: absent
-
+    
     - name: secure mysql root user for ipv4 localhost
       become: true
       community.mysql.mysql_user: name="root" password="{{ mysql_root_pw }}" host="127.0.0.1" login_unix_socket=/var/run/mysqld/mysqld.sock
-
+    
     - name: secure mysql root user for localhost
       become: true
       community.mysql.mysql_user: name="root" password="{{ mysql_root_pw }}" host="localhost" login_unix_socket=/var/run/mysqld/mysqld.sock 
-
+   
     - name: remove the mysql test database
       become: true
       community.mysql.mysql_db: db=test state=absent login_unix_socket=/var/run/mysqld/mysqld.sock
