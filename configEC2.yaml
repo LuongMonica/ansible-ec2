@@ -1,6 +1,6 @@
 ---
 - name: Configure EC2 instance to run LAMP stack
-  hosts: cit496 
+  hosts: tag_name_cit496 
   vars:
     mysql_root_pw: rootpassword
 
