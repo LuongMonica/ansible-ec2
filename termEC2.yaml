@@ -5,5 +5,6 @@
   tasks:
     - name: Terminate it
       amazon.aws.ec2:
-        instance_ids: "{{ ec2_id }}"
+        instance_ids: "{{ item.ec2_id }}"
         state: absent
+      with_items: "{{ _meta.hostvars }}"
