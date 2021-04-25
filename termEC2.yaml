@@ -1,9 +1,9 @@
 ---
 - name: Terminate EC2
   hosts: localhost
-
+  
   tasks:
     - name: Terminate it
       amazon.aws.ec2:
-        instance_ids: "{{ hostvars['3.81.143.61']['ec2_id'] }}"
+        instance_ids: "{{ hostvars['54.162.146.13']['ec2_id'] }}"
         state: absent
