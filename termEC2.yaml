@@ -3,7 +3,22 @@
   hosts: localhost
   
   tasks:
+          #    - name: get instance id
+          #      debug: 
+          #        var: hostvars[item]['ec2_id']
+          #      with_inventory_hostnames: all
+          #
+          #    - name: get instance id
+          #      debug: msg={{hostvars[item]['ec2_id']}}
+          #      when: hostvars[item]['ec2_id'] is defined
+          #      with_inventory_hostnames: all
+          #      register: instance_id
+          #
+          #    - name: print instance id
+          #      debug: msg={{instance_id}}
+          #
     - name: Terminate it
       amazon.aws.ec2:
-        instance_ids: "{{ hostvars['54.162.146.13']['ec2_id'] }}"
+        instance_ids: "{{ hostvars[item]['ec2_id'] }}"  
         state: absent
+      with_inventory_hostnames: all
